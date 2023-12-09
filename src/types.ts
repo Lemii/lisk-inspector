@@ -22,6 +22,14 @@ export type ChangeEvent = {
 
 export type ValidatorStatsMap = { [key: string]: ValidatorStats };
 
+export type Snapshot = {
+  meta: {
+    timestamp: number;
+    human: string;
+  };
+  data: ValidatorStatsMap;
+};
+
 /**
  * Lisk Service API responses
  */

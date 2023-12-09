@@ -1,29 +1,6 @@
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
-import { baseOutputPath, eventsToTrack, outputFileName } from './config';
-import { ValidatorData, ValidatorStats, ValidatorStatsMap } from './types';
+import { eventsToTrack } from './config';
+import { Snapshot, ValidatorData, ValidatorStats, ValidatorStatsMap } from './types';
 import { textSync } from 'figlet';
-
-export const getStoredValidatorStatsMap = (): ValidatorStatsMap => {
-  const path = `${baseOutputPath}/${outputFileName}`;
-
-  if (!existsSync(path)) {
-    return {};
-  }
-
-  const data = readFileSync(path, 'utf8');
-
-  return JSON.parse(data) as unknown as ValidatorStatsMap;
-};
-
-export const saveValidatorStatsMap = (data: ValidatorStatsMap) => {
-  const path = `${baseOutputPath}/${outputFileName}`;
-
-  if (existsSync(path)) {
-    copyFileSync(path, path + '.bak');
-  }
-
-  writeFileSync(path, JSON.stringify(data, null, 4));
-};
 
 export const processValidators = (
   validators: ValidatorData[],
@@ -72,6 +49,36 @@ export const processValidators = (
   }
 
   return updatedValidatorStatsMap;
+};
+
+export const snapshotIsNeeded = (currentSnapshots: Snapshot[], date: string) => {
+  const mostRecentSnapshot = currentSnapshots[currentSnapshots.length - 1];
+
+  return !mostRecentSnapshot || mostRecentSnapshot.meta.human !== date;
+};
+
+export const processSnapshot = (
+  currentSnapshots: Snapshot[],
+  currentValidatorStatsMap: ValidatorStatsMap,
+  date: string,
+  timestamp: number,
+) => {
+  const updatedSnapshots = structuredClone(currentSnapshots);
+
+  const snapshot: Snapshot = {
+    meta: { timestamp, human: date },
+    data: currentValidatorStatsMap,
+  };
+
+  // Empty events array to save space
+  Object.entries(snapshot.data).forEach(([username, data]) => {
+    snapshot.data[username] = data;
+    data.changeEvents = [];
+  });
+
+  updatedSnapshots.push(snapshot);
+
+  return updatedSnapshots;
 };
 
 export const logSplashScreen = () => {

@@ -1,16 +1,18 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { getStoredValidatorStatsMap, logSplashScreen, processValidators, saveValidatorStatsMap } from './utils';
+import { logSplashScreen, processSnapshot, processValidators, snapshotIsNeeded } from './utils';
+import { getSnapshots, getStoredValidatorStatsMap, saveSnapshots, saveValidatorStatsMap } from './storage';
 import { fetchValidators } from './services';
 import { logger } from './lib';
 import { updateInterval } from './config';
+import { format } from 'date-fns';
 
 logSplashScreen();
 
-const main = async () => {
-  logger.info('Starting update..');
-  const timestamp = Date.now();
+const generateData = async (date: Date) => {
+  logger.info('Starting validator data process..');
+  const timestamp = date.getTime();
 
   logger.info('Loading stored validator statistics..');
   const validatorStatsMap = getStoredValidatorStatsMap();
@@ -27,6 +29,33 @@ const main = async () => {
   logger.info('Done! ✅\n');
 };
 
-setInterval(() => main(), updateInterval);
+const generateSnapshot = async (date: Date) => {
+  logger.info('Starting snapshot process..');
+  const formattedDate = format(date, 'yyyy-MM-dd');
 
-main();
+  logger.info('Loading stored snapshots..');
+  const snapshots = getSnapshots();
+
+  if (!snapshotIsNeeded(snapshots, formattedDate)) {
+    logger.info('Snapshot not needed, goodbye 👋\n');
+    return;
+  }
+
+  logger.info('Loading stored validator statistics..');
+  const validatorStatsMap = getStoredValidatorStatsMap();
+
+  logger.info(`Creating new snapshot..`);
+  const updatedSnapshots = processSnapshot(snapshots, validatorStatsMap, formattedDate, date.getTime());
+
+  logger.info('Saving updated snapshots..');
+  saveSnapshots(updatedSnapshots);
+
+  logger.info('Done! ✅\n');
+};
+
+setInterval(async () => {
+  const date = new Date();
+
+  await generateData(date);
+  await generateSnapshot(date);
+}, 10000);
