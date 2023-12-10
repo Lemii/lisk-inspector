@@ -58,4 +58,4 @@ setInterval(async () => {
 
   await generateData(date);
   await generateSnapshot(date);
-}, 10000);
+}, updateInterval);

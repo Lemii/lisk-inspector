@@ -26,7 +26,7 @@ npm run build
 npm start
 
 # Run as PM2 process
-pm2 start npm --name "lisk-inspector" -- run start && pm2 log
+npm run pm2
 
 ```
 
