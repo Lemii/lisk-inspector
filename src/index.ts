@@ -7,8 +7,19 @@ import { fetchValidators } from './services';
 import { logger } from './lib';
 import { updateInterval } from './config';
 import { format } from 'date-fns';
+import db from './db';
 
-logSplashScreen();
+const start = () => {
+  logSplashScreen();
+  console.log(db);
+
+  setInterval(async () => {
+    const date = new Date();
+
+    await generateData(date);
+    await generateSnapshot(date);
+  }, updateInterval);
+};
 
 const generateData = async (date: Date) => {
   logger.info('Starting validator data process..');
@@ -53,9 +64,4 @@ const generateSnapshot = async (date: Date) => {
   logger.info('Done! ✅\n');
 };
 
-setInterval(async () => {
-  const date = new Date();
-
-  await generateData(date);
-  await generateSnapshot(date);
-}, updateInterval);
+start();

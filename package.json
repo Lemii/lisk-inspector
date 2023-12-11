@@ -19,12 +19,14 @@
   "dependencies": {
     "app-root-path": "^3.1.0",
     "axios": "^1.6.2",
+    "better-sqlite3": "^9.2.2",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "figlet": "^1.7.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
     "@types/figlet": "^1.5.8",
     "@types/node": "^20.10.4",
     "rimraf": "^5.0.5",
