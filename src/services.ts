@@ -1,4 +1,4 @@
-import { baseNodeUrl } from './config';
+import { primaryNodeUrl } from './config';
 import { getApi, logger } from './lib';
 import { ValidatorApiResponse, ValidatorData, ValidatorStats } from './types';
 
@@ -17,7 +17,7 @@ export const fetchValidators = async (): Promise<ValidatorData[]> =>
         return;
       }
 
-      const url = `${baseNodeUrl}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
+      const url = `${primaryNodeUrl}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
 
       logger.debug(`Fetching validator data from ${url}`);
 

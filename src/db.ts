@@ -6,7 +6,7 @@ const db = new Database(databasePath, { verbose: logger.debug });
 
 db.pragma('journal_mode = WAL');
 
-const initialize = () => {
+const initializeDatabase = () => {
   const createValidatorsTable = `CREATE TABLE IF NOT EXISTS validators (
     id INTEGER PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
@@ -25,6 +25,14 @@ const initialize = () => {
   db.exec(createSnapshotsTable);
 };
 
-initialize();
+initializeDatabase();
+
+export const getAllValidatorByName = (name: string) => {
+  const dbEntry = db.prepare('SELECT data FROM validators WHERE username = ?').get(name);
+
+  console.log(dbEntry);
+};
+
+getAllValidatorByName('panzer');
 
 export default db;

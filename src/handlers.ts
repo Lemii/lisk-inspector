@@ -1,6 +1,6 @@
 import { eventsToTrack } from './config';
 import db from './db';
-import { Snapshot, ValidatorData, ValidatorStats, ValidatorStatsMap } from './types';
+import { Snapshot, SnapshotInDb, ValidatorData, ValidatorStats, ValidatorStatsMap } from './types';
 
 export const processValidators = (validators: ValidatorData[], timestamp: number) => {
   for (const validator of validators) {
@@ -46,4 +46,27 @@ export const processValidators = (validators: ValidatorData[], timestamp: number
       db.prepare('INSERT INTO validators (username, data) VALUES (?, ?)').run(validator.name, JSON.stringify(stats));
     }
   }
+};
+
+export const processSnapshot = (date: string, timestamp: number) => {
+  const validators = db.prepare('SELECT username, data FROM validators').all() as {
+    username: string;
+    data: string;
+  }[];
+
+  const snapshot: SnapshotInDb = {};
+
+  validators.forEach(({ username, data }) => {
+    const validatorStats: ValidatorStats = JSON.parse(data);
+    snapshot[username] = validatorStats;
+
+    // Empty events array to save space
+    delete snapshot[username]?.changeEvents;
+  });
+
+  db.prepare('INSERT INTO snapshots (timestamp, human, data) VALUES (?, ?, ?)').run(
+    timestamp,
+    date,
+    JSON.stringify(snapshot),
+  );
 };

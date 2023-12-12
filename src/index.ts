@@ -1,12 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { logSplashScreen, processSnapshot, snapshotIsNeeded } from './utils';
+import { logSplashScreen, snapshotIsNeeded } from './utils';
 import { fetchValidators } from './services';
 import { logger } from './lib';
 import { updateInterval } from './config';
 import { format } from 'date-fns';
-import { processValidators } from './handlers';
+import { processSnapshot, processValidators } from './handlers';
 
 const start = () => {
   logSplashScreen();
