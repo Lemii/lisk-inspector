@@ -12,4 +12,4 @@ export const baseNodeUrl = process.env.LS_NODE ?? 'https://service.lisk.com/api/
 
 export const eventsToTrack = ['rank', 'totalStake', 'selfStake', 'commission', 'consecutiveMissedBlocks'] as const;
 
-export const updateInterval = 60 * 1000;
+export const updateInterval = process.env.NODE_ENV === 'development' ? 10 * 1000 : 60 * 1000;

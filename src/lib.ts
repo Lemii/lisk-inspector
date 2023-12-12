@@ -11,5 +11,5 @@ const myFormat = printf(({ level, message, timestamp }) => {
 
 export const logger = winston.createLogger({
   format: combine(timestamp(), myFormat),
-  transports: [new winston.transports.Console()],
+  transports: [new winston.transports.Console({ level: 'debug' })],
 });

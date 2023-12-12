@@ -8,7 +8,7 @@ export type ValidatorStats = {
   commission: number;
   generatedBlocks: number;
   consecutiveMissedBlocks: number;
-  changeEvents: ChangeEvent[];
+  changeEvents?: ChangeEvent[];
 };
 
 export type EventsToTrack = (typeof eventsToTrack)[number];
@@ -27,8 +27,10 @@ export type Snapshot = {
     timestamp: number;
     human: string;
   };
-  data: ValidatorStatsMap;
+  data: Omit<ValidatorStatsMap, 'changeEvents'>;
 };
+
+export type SnapshotInDb = Omit<ValidatorStatsMap, 'changeEvents'>;
 
 /**
  * Lisk Service API responses

@@ -17,9 +17,9 @@ export const fetchValidators = async (): Promise<ValidatorData[]> =>
         return;
       }
 
-      logger.debug(`Fetching validator page with offset: ${offset}`);
-
       const url = `${baseNodeUrl}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
+
+      logger.debug(`Fetching validator data from ${url}`);
 
       const validatorData = await getApi()
         .get<ValidatorApiResponse>(url)
