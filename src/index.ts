@@ -7,15 +7,21 @@ import { logger } from './lib';
 import { updateInterval } from './config';
 import { format } from 'date-fns';
 import { processSnapshot, processValidators } from './handlers';
+import { initializeDatabase } from './db';
 
 const start = () => {
   logSplashScreen();
+  initializeDatabase();
 
   setInterval(async () => {
     const date = new Date();
 
-    await generateData(date);
-    await generateSnapshot(date);
+    try {
+      await generateData(date);
+      generateSnapshot(date);
+    } catch (err) {
+      logger.error(err);
+    }
   }, updateInterval);
 };
 

@@ -1,72 +1,64 @@
 import { eventsToTrack } from './config';
-import db from './db';
-import { Snapshot, SnapshotInDb, ValidatorData, ValidatorStats, ValidatorStatsMap } from './types';
+import * as db from './db';
+import { SnapshotData, ValidatorApiData, ValidatorData } from './types';
 
-export const processValidators = (validators: ValidatorData[], timestamp: number) => {
-  for (const validator of validators) {
-    const dbEntry = db.prepare('SELECT data FROM validators WHERE username = ?').get(validator.name) as {
-      data?: string;
-    };
+export const processValidators = (validators: ValidatorApiData[], timestamp: number) => {
+  for (const validatorApiData of validators) {
+    const validatorData = db.getValidatorByName(validatorApiData.name);
 
-    if (dbEntry?.data) {
-      const validatorStats: ValidatorStats = JSON.parse(dbEntry.data);
-
+    if (validatorData) {
+      /** statistics that should be included in changeEvents field */
       for (const key of eventsToTrack) {
-        const oldValue = validatorStats[key];
-        const newValue = validator[key];
+        const oldValue = validatorData[key];
+        const newValue = validatorApiData[key];
 
         if (newValue !== oldValue) {
           // @ts-ignore
-          validatorStats[key] = newValue;
-          validatorStats.changeEvents?.push({ timestamp, type: key, oldValue, newValue });
+          validatorData[key] = newValue;
+          validatorData.changeEvents?.push({ timestamp, type: key, oldValue, newValue });
 
+          /** Unique handling of consecutiveMissedBlocks to keep track of total missed blocks */
           if (key === 'consecutiveMissedBlocks' && (newValue as number) > 0) {
             const diff = (newValue as number) - (oldValue as number);
-            validatorStats.totalMissedBlocks += diff;
+            validatorData.totalMissedBlocks += diff;
           }
         }
       }
 
-      db.prepare('UPDATE validators SET data = ? WHERE username = ?').run(
-        JSON.stringify(validatorStats),
-        validator.name,
-      );
+      /** statistics that should still be tracked, but not included in changeEvents */
+      validatorData.generatedBlocks = validatorApiData.generatedBlocks;
+
+      db.updateValidator(validatorData, validatorApiData.name);
     } else {
-      const stats: ValidatorStats = {
-        rank: validator.rank,
+      /** create new entry in db */
+      const validatorData: ValidatorData = {
+        rank: validatorApiData.rank,
         totalMissedBlocks: 0,
-        totalStake: validator.totalStake,
-        selfStake: validator.selfStake,
-        commission: validator.commission,
-        generatedBlocks: validator.generatedBlocks,
-        consecutiveMissedBlocks: validator.consecutiveMissedBlocks,
+        totalStake: validatorApiData.totalStake,
+        selfStake: validatorApiData.selfStake,
+        commission: validatorApiData.commission,
+        generatedBlocks: validatorApiData.generatedBlocks,
+        consecutiveMissedBlocks: validatorApiData.consecutiveMissedBlocks,
         changeEvents: [],
       };
 
-      db.prepare('INSERT INTO validators (username, data) VALUES (?, ?)').run(validator.name, JSON.stringify(stats));
+      db.insertValidator(validatorApiData.name, validatorData);
     }
   }
 };
 
 export const processSnapshot = (date: string, timestamp: number) => {
-  const validators = db.prepare('SELECT username, data FROM validators').all() as {
-    username: string;
-    data: string;
-  }[];
+  const validators = db.getAllValidators();
 
-  const snapshot: SnapshotInDb = {};
+  const snapshot: SnapshotData = {};
 
   validators.forEach(({ username, data }) => {
-    const validatorStats: ValidatorStats = JSON.parse(data);
+    const validatorStats: ValidatorData = JSON.parse(data);
     snapshot[username] = validatorStats;
 
     // Empty events array to save space
     delete snapshot[username]?.changeEvents;
   });
 
-  db.prepare('INSERT INTO snapshots (timestamp, human, data) VALUES (?, ?, ?)').run(
-    timestamp,
-    date,
-    JSON.stringify(snapshot),
-  );
+  db.insertSnapshot(timestamp, date, snapshot);
 };

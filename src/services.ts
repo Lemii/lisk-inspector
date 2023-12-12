@@ -1,10 +1,10 @@
 import { primaryNodeUrl } from './config';
 import { getApi, logger } from './lib';
-import { ValidatorApiResponse, ValidatorData, ValidatorStats } from './types';
+import { ValidatorApiResponse, ValidatorApiData, ValidatorData } from './types';
 
-export const fetchValidators = async (): Promise<ValidatorData[]> =>
+export const fetchValidators = async (): Promise<ValidatorApiData[]> =>
   new Promise(async resolve => {
-    const output: ValidatorData[] = [];
+    const output: ValidatorApiData[] = [];
     const selfStakeThreshold = BigInt('100000000000'); // limit results to validators with >= 1000 LSK self-stake
     const pageSize = 103;
 
