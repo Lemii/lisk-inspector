@@ -18,8 +18,8 @@ export const initializeDatabase = () => {
 
   const createSnapshotsTable = `CREATE TABLE IF NOT EXISTS snapshots (
     id INTEGER PRIMARY KEY,
-    timestamp INTEGER NOT NULL,
-    human TEXT NOT NULL,
+    timestamp INTEGER NOT NULL UNIQUE,
+    human TEXT NOT NULL UNIQUE,
     data TEXT NOT NULL
 );`;
 

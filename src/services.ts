@@ -1,6 +1,6 @@
 import { primaryNodeUrl } from './config';
 import { getApi, logger } from './lib';
-import { ValidatorApiResponse, ValidatorApiData, ValidatorData } from './types';
+import { ValidatorApiResponse, ValidatorApiData } from './types';
 
 export const fetchValidators = async (): Promise<ValidatorApiData[]> =>
   new Promise(async resolve => {

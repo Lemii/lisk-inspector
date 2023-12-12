@@ -16,12 +16,8 @@ const start = () => {
   setInterval(async () => {
     const date = new Date();
 
-    try {
-      await generateData(date);
-      generateSnapshot(date);
-    } catch (err) {
-      logger.error(err);
-    }
+    await generateData(date);
+    generateSnapshot(date);
   }, updateInterval);
 };
 
