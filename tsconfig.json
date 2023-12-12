@@ -15,7 +15,8 @@
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
     "outDir": "dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "noUnusedLocals": true
   },
   "include": ["src"]
 }

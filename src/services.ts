@@ -1,10 +1,10 @@
-import { baseNodeUrl } from './config';
+import { primaryNodeUrl } from './config';
 import { getApi, logger } from './lib';
-import { ValidatorApiResponse, ValidatorData, ValidatorStats } from './types';
+import { ValidatorApiResponse, ValidatorApiData } from './types';
 
-export const fetchValidators = async (): Promise<ValidatorData[]> =>
+export const fetchValidators = async (): Promise<ValidatorApiData[]> =>
   new Promise(async resolve => {
-    const output: ValidatorData[] = [];
+    const output: ValidatorApiData[] = [];
     const selfStakeThreshold = BigInt('100000000000'); // limit results to validators with >= 1000 LSK self-stake
     const pageSize = 103;
 
@@ -17,9 +17,9 @@ export const fetchValidators = async (): Promise<ValidatorData[]> =>
         return;
       }
 
-      logger.debug(`Fetching validator page with offset: ${offset}`);
+      const url = `${primaryNodeUrl}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
 
-      const url = `${baseNodeUrl}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
+      logger.debug(`Fetching validator data from ${url}`);
 
       const validatorData = await getApi()
         .get<ValidatorApiResponse>(url)

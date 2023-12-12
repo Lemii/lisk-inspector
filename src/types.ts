@@ -1,6 +1,6 @@
 import { eventsToTrack } from './config';
 
-export type ValidatorStats = {
+export type ValidatorData = {
   rank: number;
   totalMissedBlocks: number;
   totalStake: string;
@@ -8,7 +8,7 @@ export type ValidatorStats = {
   commission: number;
   generatedBlocks: number;
   consecutiveMissedBlocks: number;
-  changeEvents: ChangeEvent[];
+  changeEvents?: ChangeEvent[]; // optional to be able to delete it in snapshot without compiler errors
 };
 
 export type EventsToTrack = (typeof eventsToTrack)[number];
@@ -20,15 +20,7 @@ export type ChangeEvent = {
   newValue: number | string;
 };
 
-export type ValidatorStatsMap = { [key: string]: ValidatorStats };
-
-export type Snapshot = {
-  meta: {
-    timestamp: number;
-    human: string;
-  };
-  data: ValidatorStatsMap;
-};
+export type SnapshotData = { [key: string]: ValidatorData };
 
 /**
  * Lisk Service API responses
@@ -39,10 +31,10 @@ export type ValidatorApiResponse = {
     offset: number;
     total: number;
   };
-  data: ValidatorData[];
+  data: ValidatorApiData[];
 };
 
-export type ValidatorData = {
+export type ValidatorApiData = {
   name: string;
   totalStake: string;
   selfStake: string;
