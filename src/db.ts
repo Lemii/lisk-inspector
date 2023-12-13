@@ -7,7 +7,10 @@ const db = new Database(databasePath, { verbose: logger.debug });
 
 db.pragma('journal_mode = WAL');
 
-export const initializeDatabase = () => {
+export const setupDb = () => {
+  logger.info('Setting up database..');
+
+  logger.debug(`Creating tables (if applicable)..`);
   const createValidatorsTable = `CREATE TABLE IF NOT EXISTS validators (
     id INTEGER PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
@@ -24,6 +27,17 @@ export const initializeDatabase = () => {
 );`;
 
   db.exec(createSnapshotsTable);
+
+  logger.debug('Configuring db close on process exit..');
+  process.on('exit', () => {
+    logger.debug('Closing database connection..');
+    db.close();
+  });
+  process.on('SIGHUP', () => process.exit(128 + 1));
+  process.on('SIGINT', () => process.exit(128 + 2));
+  process.on('SIGTERM', () => process.exit(128 + 15));
+
+  logger.info('Done! ✅\n');
 };
 
 export const getValidatorByName = (name: string) => {

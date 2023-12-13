@@ -7,11 +7,11 @@ import { logger } from './lib';
 import { updateInterval } from './config';
 import { format } from 'date-fns';
 import { processSnapshot, processValidators } from './handlers';
-import { initializeDatabase } from './db';
+import { setupDb } from './db';
 
 const start = () => {
   logSplashScreen();
-  initializeDatabase();
+  setupDb();
 
   setInterval(async () => {
     const date = new Date();
