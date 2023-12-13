@@ -62,3 +62,18 @@ export type ValidatorApiData = {
   totalSelfStakeRewards: string;
   earnedRewards: string;
 };
+
+export interface IndexStatusAPIResponse {
+  data: {
+    genesisHeight: number;
+    lastBlockHeight: number;
+    lastIndexedBlockHeight: number;
+    chainLength: number;
+    numBlocksIndexed: number;
+    percentageIndexed: number;
+    isIndexingInProgress: boolean;
+  };
+  meta: {
+    lastUpdate: number;
+  };
+}

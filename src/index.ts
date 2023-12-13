@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { logSplashScreen, snapshotIsNeeded } from './utils';
+import { getLsNode, logSplashScreen, snapshotIsNeeded } from './utils';
 import { fetchValidators } from './services';
 import { logger } from './lib';
 import { updateInterval } from './config';
@@ -25,8 +25,16 @@ const generateData = async (date: Date) => {
   logger.info('Starting validator data process..');
   const timestamp = date.getTime();
 
+  logger.info('Verifying node health..');
+  const node = await getLsNode();
+
+  if (!node) {
+    logger.info('No healthy nodes available 💀 Stopping..');
+    return;
+  }
+
   logger.info('Fetching live validator data..');
-  const validators = await fetchValidators();
+  const validators = await fetchValidators(node);
 
   logger.info(`Processing data of ${validators.length} validators..`);
   processValidators(validators, timestamp);

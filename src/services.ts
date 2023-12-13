@@ -1,8 +1,29 @@
-import { primaryNodeUrl } from './config';
 import { getApi, logger } from './lib';
-import { ValidatorApiResponse, ValidatorApiData } from './types';
+import { ValidatorApiResponse, ValidatorApiData, IndexStatusAPIResponse } from './types';
 
-export const fetchValidators = async (): Promise<ValidatorApiData[]> =>
+export const nodeIsHealthy = async (node: string) => {
+  try {
+    const url = `${node}/index/status`;
+
+    logger.debug(`Fetching index status from ${url}`);
+
+    const status = await getApi()
+      .get<IndexStatusAPIResponse>(url)
+      .then(res => res.data);
+
+    if (status.data.isIndexingInProgress) {
+      logger.debug(`Node is indexing and not unavailable..`);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    logger.debug(`Node is unreachable..`);
+    return false;
+  }
+};
+
+export const fetchValidators = async (node: string): Promise<ValidatorApiData[]> =>
   new Promise(async resolve => {
     const output: ValidatorApiData[] = [];
     const selfStakeThreshold = BigInt('100000000000'); // limit results to validators with >= 1000 LSK self-stake
@@ -17,7 +38,7 @@ export const fetchValidators = async (): Promise<ValidatorApiData[]> =>
         return;
       }
 
-      const url = `${primaryNodeUrl}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
+      const url = `${node}/pos/validators?limit=${pageSize}&sort=rank:asc&offset=${offset}`;
 
       logger.debug(`Fetching validator data from ${url}`);
 
