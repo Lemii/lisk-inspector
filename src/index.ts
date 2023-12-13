@@ -4,14 +4,20 @@ dotenv.config();
 import { getLsNode, logSplashScreen, snapshotIsNeeded } from './utils';
 import { fetchValidators } from './services';
 import { logger } from './lib';
-import { updateInterval } from './config';
+import { apiPort, updateInterval } from './config';
 import { format } from 'date-fns';
 import { processSnapshot, processValidators } from './handlers';
 import { setupDb } from './db';
+import './api';
+import { app } from './api';
 
 const start = () => {
   logSplashScreen();
   setupDb();
+
+  app.listen(apiPort, () => {
+    logger.info(`Express server running on port ${apiPort}`);
+  });
 
   setInterval(async () => {
     const date = new Date();
