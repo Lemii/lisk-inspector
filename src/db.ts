@@ -86,3 +86,19 @@ export const getLatestSnapshotDate = () => {
 
   return snapshot;
 };
+
+export const getLatestSnapshot = () => {
+  const query = 'SELECT timestamp,human,data FROM snapshots ORDER BY id DESC LIMIT 1;';
+  const snapshot = db.prepare(query).get() as { timestamp: number; human: string; data: string } | undefined;
+
+  if (!snapshot) {
+    return undefined;
+  }
+
+  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
+    ...snapshot,
+    data: JSON.parse(snapshot.data),
+  };
+
+  return parsed;
+};
