@@ -57,7 +57,12 @@ export const getAllValidators = () => {
   const query = 'SELECT username, data FROM validators';
   const validators = db.prepare(query).all() as { username: string; data: string }[];
 
-  return validators;
+  const parsed: { username: string; data: ValidatorData }[] = validators.map(({ username, data }) => ({
+    username,
+    data: JSON.parse(data),
+  }));
+
+  return parsed;
 };
 
 export const insertValidator = (name: string, data: ValidatorData) => {
@@ -75,7 +80,7 @@ export const insertSnapshot = (timestamp: number, date: string, snapshot: Snapsh
   db.prepare(query).run(timestamp, date, JSON.stringify(snapshot));
 };
 
-export const getLatestSnapshot = () => {
+export const getLatestSnapshotDate = () => {
   const query = 'SELECT human FROM snapshots ORDER BY id DESC LIMIT 1;';
   const snapshot = db.prepare(query).get() as { human: string } | undefined;
 

@@ -1,10 +1,10 @@
 import { nodeList } from './config';
-import { getLatestSnapshot } from './db';
+import { getLatestSnapshotDate } from './db';
 import { textSync } from 'figlet';
 import { nodeIsHealthy } from './services';
 
 export const snapshotIsNeeded = (date: string) => {
-  const snapshot = getLatestSnapshot();
+  const snapshot = getLatestSnapshotDate();
   return !snapshot || snapshot.human !== date;
 };
 

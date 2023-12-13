@@ -49,11 +49,10 @@ export const processValidators = (validators: ValidatorApiData[], timestamp: num
 
 export const processSnapshot = (date: string, timestamp: number) => {
   const validators = db.getAllValidators();
-
   const snapshot: SnapshotData = {};
 
   validators.forEach(({ username, data }) => {
-    const validatorStats: ValidatorData = JSON.parse(data);
+    const validatorStats = data;
     snapshot[username] = validatorStats;
 
     // Empty events array to save space
