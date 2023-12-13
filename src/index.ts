@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { getLsNode, logSplashScreen, snapshotIsNeeded } from './utils';
-import { fetchValidators } from './services';
+import { getLsNode, getMissingUsers, logSplashScreen, snapshotIsNeeded } from './utils';
+import { fetchMissingValidators, fetchValidators } from './services';
 import { logger } from './lib';
 import { apiPort, updateInterval } from './config';
 import { format } from 'date-fns';
@@ -41,6 +41,22 @@ const generateData = async (date: Date) => {
 
   logger.info('Fetching live validator data..');
   const validators = await fetchValidators(node);
+
+  /**
+   * Get the names of validators who didn't show up in the initial fetchValidators query,
+   * but who are present in the database.
+   *
+   * Possible scenarios: validator completely removed self-stake and therefore is
+   * not fetched by default any more (because it filters out self-stake <= low amount).
+   * The tool still needs to be able to track the changes in statistics,
+   * so the data for these validator is explicitly requested.
+   */
+  const validatorsToCheck = getMissingUsers(validators);
+
+  if (validatorsToCheck.length) {
+    const missingValidators = await fetchMissingValidators(node, validatorsToCheck);
+    missingValidators.forEach(validator => validators.push(validator));
+  }
 
   logger.info(`Processing data of ${validators.length} validators..`);
   processValidators(validators, timestamp);

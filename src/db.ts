@@ -65,6 +65,13 @@ export const getAllValidators = () => {
   return parsed;
 };
 
+export const getAllValidatorUsernames = () => {
+  const query = 'SELECT username FROM validators';
+  const queryResult = db.prepare(query).all() as { username: string }[];
+
+  return queryResult.map(res => res.username);
+};
+
 export const insertValidator = (name: string, data: ValidatorData) => {
   const query = 'INSERT INTO validators (username, data) VALUES (?, ?)';
   db.prepare(query).run(name, JSON.stringify(data));

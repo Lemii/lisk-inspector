@@ -61,3 +61,14 @@ export const fetchValidators = async (node: string): Promise<ValidatorApiData[]>
 
     fetchData(offset);
   });
+
+export const fetchMissingValidators = async (node: string, validatorNames: string[]) => {
+  const url = `${node}/pos/validators?limit=${103}&sort=rank:asc&name=${validatorNames.join(',')}`;
+  logger.debug(`Fetching validator data from ${url}`);
+
+  const validatorData = await getApi()
+    .get<ValidatorApiResponse>(url)
+    .then(res => res.data);
+
+  return validatorData.data;
+};

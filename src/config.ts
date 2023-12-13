@@ -3,8 +3,8 @@ import appRootPath from 'app-root-path';
 export const databasePath = appRootPath.toString() + '/database/' + process.env.DB_FILE_NAME ?? 'data.db';
 
 export const nodeList = [
-  'https://service.lisk.com/api/v3',
   'https://mainnet-service.lemii.dev/api/v3',
+  'https://service.lisk.com/api/v3',
   'https://lisk-mainnet-service.punkrock.me/api/v3',
   'https://mainnet-service.liskscan.com/api/v3',
 ];
