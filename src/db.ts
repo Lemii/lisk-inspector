@@ -3,7 +3,7 @@ import { databasePath } from './config';
 import { logger } from './lib';
 import { SnapshotData, ValidatorData } from './types';
 
-const db = new Database(databasePath, { verbose: logger.debug });
+const db = new Database(databasePath, { verbose: logger.silly });
 
 db.pragma('journal_mode = WAL');
 
