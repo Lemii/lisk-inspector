@@ -3,7 +3,7 @@ import { databasePath } from './config';
 import { logger } from './lib';
 import { SnapshotData, ValidatorData } from './types';
 
-const db = new Database(databasePath, { verbose: logger.debug });
+const db = new Database(databasePath, { verbose: logger.silly });
 
 db.pragma('journal_mode = WAL');
 
@@ -57,7 +57,19 @@ export const getAllValidators = () => {
   const query = 'SELECT username, data FROM validators';
   const validators = db.prepare(query).all() as { username: string; data: string }[];
 
-  return validators;
+  const parsed: { username: string; data: ValidatorData }[] = validators.map(({ username, data }) => ({
+    username,
+    data: JSON.parse(data),
+  }));
+
+  return parsed;
+};
+
+export const getAllValidatorUsernames = () => {
+  const query = 'SELECT username FROM validators';
+  const queryResult = db.prepare(query).all() as { username: string }[];
+
+  return queryResult.map(res => res.username);
 };
 
 export const insertValidator = (name: string, data: ValidatorData) => {
@@ -75,9 +87,41 @@ export const insertSnapshot = (timestamp: number, date: string, snapshot: Snapsh
   db.prepare(query).run(timestamp, date, JSON.stringify(snapshot));
 };
 
-export const getLatestSnapshot = () => {
+export const getLatestSnapshotDate = () => {
   const query = 'SELECT human FROM snapshots ORDER BY id DESC LIMIT 1;';
   const snapshot = db.prepare(query).get() as { human: string } | undefined;
 
   return snapshot;
+};
+
+export const getLatestSnapshot = () => {
+  const query = 'SELECT timestamp,human,data FROM snapshots ORDER BY id DESC LIMIT 1;';
+  const snapshot = db.prepare(query).get() as { timestamp: number; human: string; data: string } | undefined;
+
+  if (!snapshot) {
+    return undefined;
+  }
+
+  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
+    ...snapshot,
+    data: JSON.parse(snapshot.data),
+  };
+
+  return parsed;
+};
+
+export const getSnapshotByDate = (date: string) => {
+  const query = 'SELECT timestamp,human,data FROM snapshots WHERE human = ?';
+  const snapshot = db.prepare(query).get(date) as { timestamp: number; human: string; data: string } | undefined;
+
+  if (!snapshot) {
+    return undefined;
+  }
+
+  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
+    ...snapshot,
+    data: JSON.parse(snapshot.data),
+  };
+
+  return parsed;
 };

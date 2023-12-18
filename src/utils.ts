@@ -1,10 +1,11 @@
 import { nodeList } from './config';
-import { getLatestSnapshot } from './db';
+import { getAllValidatorUsernames, getLatestSnapshotDate } from './db';
 import { textSync } from 'figlet';
 import { nodeIsHealthy } from './services';
+import { ValidatorApiData } from './types';
 
 export const snapshotIsNeeded = (date: string) => {
-  const snapshot = getLatestSnapshot();
+  const snapshot = getLatestSnapshotDate();
   return !snapshot || snapshot.human !== date;
 };
 
@@ -29,4 +30,11 @@ export const getLsNode = async () => {
   }
 
   return output;
+};
+
+export const getMissingUsers = (validators: ValidatorApiData[]) => {
+  const fetchedValidatorNames = validators.map(validator => validator.name);
+  const validatorNamesInDb = getAllValidatorUsernames();
+
+  return validatorNamesInDb.filter(name => !fetchedValidatorNames.includes(name));
 };
