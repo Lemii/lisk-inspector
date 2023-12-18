@@ -41,6 +41,16 @@ app.get('/validators/missed', (_req, res) => {
   res.send(withMissedBlocks);
 });
 
+app.get('/validators/punished', (_req, res) => {
+  const validators = getAllValidators();
+
+  const withPunishments = validators
+    .filter(validator => validator.data.totalPunishments)
+    .sort((a, b) => (b.data.totalPunishments > a.data.totalPunishments ? 1 : -1));
+
+  res.send(withPunishments);
+});
+
 app.get('/snapshot', (_req, res) => {
   const snapshot = getLatestSnapshot();
 

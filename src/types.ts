@@ -3,6 +3,7 @@ import { eventsToTrack } from './config';
 export type ValidatorData = {
   rank: number;
   totalMissedBlocks: number;
+  totalPunishments: number;
   totalStake: string;
   selfStake: string;
   commission: number;

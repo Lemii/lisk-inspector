@@ -26,6 +26,7 @@ export const processValidators = (validators: ValidatorApiData[], timestamp: num
       }
 
       /** statistics that should still be tracked, but not included in changeEvents */
+      validatorData.totalPunishments = validatorApiData.punishmentPeriods.length;
       validatorData.generatedBlocks = validatorApiData.generatedBlocks;
 
       db.updateValidator(validatorData, validatorApiData.name);
@@ -34,6 +35,7 @@ export const processValidators = (validators: ValidatorApiData[], timestamp: num
       const validatorData: ValidatorData = {
         rank: validatorApiData.rank,
         totalMissedBlocks: 0,
+        totalPunishments: validatorApiData.punishmentPeriods.length,
         totalStake: validatorApiData.totalStake,
         selfStake: validatorApiData.selfStake,
         commission: validatorApiData.commission,
