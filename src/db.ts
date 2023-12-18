@@ -109,3 +109,19 @@ export const getLatestSnapshot = () => {
 
   return parsed;
 };
+
+export const getSnapshotByDate = (date: string) => {
+  const query = 'SELECT timestamp,human,data FROM snapshots WHERE human = ?';
+  const snapshot = db.prepare(query).get(date) as { timestamp: number; human: string; data: string } | undefined;
+
+  if (!snapshot) {
+    return undefined;
+  }
+
+  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
+    ...snapshot,
+    data: JSON.parse(snapshot.data),
+  };
+
+  return parsed;
+};

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllValidators, getLatestSnapshot } from './db';
+import { getAllValidators, getLatestSnapshot, getSnapshotByDate } from './db';
 import { logger } from './lib';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
@@ -34,16 +34,32 @@ app.get('/validators', (_req, res) => {
 app.get('/validators/missed', (_req, res) => {
   const validators = getAllValidators();
 
-  const withMissedBlocks = validators.filter(validator => validator.data.totalMissedBlocks);
+  const withMissedBlocks = validators
+    .filter(validator => validator.data.totalMissedBlocks)
+    .sort((a, b) => (b.data.totalMissedBlocks > a.data.totalMissedBlocks ? 1 : -1));
 
   res.send(withMissedBlocks);
 });
 
-app.get('/snapshot/latest', (_req, res) => {
+app.get('/snapshot', (_req, res) => {
   const snapshot = getLatestSnapshot();
 
   if (!snapshot) {
     res.sendStatus(204); // no content
+    return;
+  }
+
+  res.send(snapshot);
+});
+
+app.get('/snapshot/:date', (req, res) => {
+  const { date } = req.params;
+
+  const snapshot = getSnapshotByDate(date);
+
+  if (!snapshot) {
+    res.sendStatus(204); // no content
+    return;
   }
 
   res.send(snapshot);
