@@ -3,6 +3,8 @@ import { getAllValidatorUsernames, getLatestSnapshotDate } from './db';
 import { textSync } from 'figlet';
 import { nodeIsHealthy } from './services';
 import { ValidatorApiData } from './types';
+import { logger } from './lib';
+import { AxiosError } from 'axios';
 
 export const snapshotIsNeeded = (date: string) => {
   const snapshot = getLatestSnapshotDate();
@@ -37,4 +39,20 @@ export const getMissingUsers = (validators: ValidatorApiData[]) => {
   const validatorNamesInDb = getAllValidatorUsernames();
 
   return validatorNamesInDb.filter(name => !fetchedValidatorNames.includes(name));
+};
+
+export const handleError = (error: unknown) => {
+  let message: any = 'Something went wrong';
+
+  if (typeof error === 'string') {
+    message = error;
+  } else if (error instanceof AxiosError) {
+    message = error.response?.data || error.message;
+  } else if (error instanceof Error) {
+    message = error.message;
+  } else {
+    message = error;
+  }
+
+  logger.error(message);
 };

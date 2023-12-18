@@ -1,5 +1,6 @@
 import { getApi, logger } from './lib';
 import { ValidatorApiResponse, ValidatorApiData, IndexStatusAPIResponse } from './types';
+import { handleError } from './utils';
 
 export const nodeIsHealthy = async (node: string) => {
   try {
@@ -42,17 +43,22 @@ export const fetchValidators = async (node: string): Promise<ValidatorApiData[]>
 
       logger.debug(`Fetching validator data from ${url}`);
 
-      const validatorData = await getApi()
-        .get<ValidatorApiResponse>(url)
-        .then(res => res.data);
+      try {
+        const validatorData = await getApi()
+          .get<ValidatorApiResponse>(url)
+          .then(res => res.data);
 
-      for (const validator of validatorData.data) {
-        if (BigInt(validator.selfStake) < selfStakeThreshold) {
-          stopped = true;
-          break;
+        for (const validator of validatorData.data) {
+          if (BigInt(validator.selfStake) < selfStakeThreshold) {
+            stopped = true;
+            break;
+          }
+
+          output.push(validator);
         }
-
-        output.push(validator);
+      } catch (err) {
+        handleError(err);
+        stopped = true;
       }
 
       offset += pageSize;

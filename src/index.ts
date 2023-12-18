@@ -8,7 +8,6 @@ import { apiPort, updateInterval } from './config';
 import { format } from 'date-fns';
 import { processSnapshot, processValidators } from './handlers';
 import { setupDb } from './db';
-import './api';
 import { app } from './api';
 
 const start = () => {
@@ -22,12 +21,18 @@ const start = () => {
   setInterval(async () => {
     const date = new Date();
 
-    await generateData(date);
+    const success = await generateValidatorData(date);
+
+    if (!success) {
+      logger.info('Previous process failed. Skipping snapshot.. 👋\n');
+      return;
+    }
+
     generateSnapshot(date);
   }, updateInterval);
 };
 
-const generateData = async (date: Date) => {
+const generateValidatorData = async (date: Date) => {
   logger.info('Starting validator data process..');
   const timestamp = date.getTime();
 
@@ -36,11 +41,16 @@ const generateData = async (date: Date) => {
 
   if (!node) {
     logger.info('No healthy nodes available 💀 Stopping..');
-    return;
+    return false;
   }
 
   logger.info('Fetching live validator data..');
   const validators = await fetchValidators(node);
+
+  if (!validators.length) {
+    logger.error('No validators fetched. Stopping process early..');
+    return false;
+  }
 
   /**
    * Get the names of validators who didn't show up in the initial fetchValidators query,
@@ -62,6 +72,8 @@ const generateData = async (date: Date) => {
   processValidators(validators, timestamp);
 
   logger.info('Done! ✅\n');
+
+  return true;
 };
 
 const generateSnapshot = async (date: Date) => {
