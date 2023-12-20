@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllValidators, getLatestSnapshot, getSnapshotByDate } from './db';
+import { getAllValidators, getLatestSnapshot, getOldestSnapshot, getSnapshotByDate, getSnapshots } from './db';
 import { logger } from './lib';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
@@ -64,8 +64,13 @@ app.get('/snapshot', (_req, res) => {
 
 app.get('/snapshot/:date', (req, res) => {
   const { date } = req.params;
+  const { fallback } = req.query;
 
-  const snapshot = getSnapshotByDate(date);
+  let snapshot = getSnapshotByDate(date);
+
+  if (!snapshot && fallback) {
+    snapshot = getOldestSnapshot();
+  }
 
   if (!snapshot) {
     res.sendStatus(204); // no content
@@ -73,4 +78,24 @@ app.get('/snapshot/:date', (req, res) => {
   }
 
   res.send(snapshot);
+});
+
+app.get('/historical/rank/:amount', (req, res) => {
+  const { amount } = req.params;
+  const snapshots = getSnapshots(amount ? Number(amount) : undefined);
+
+  if (!snapshots) {
+    res.sendStatus(204); // no content
+    return;
+  }
+
+  const filtered = snapshots.map(snapshot => {
+    const data: { username: string; rank: number }[] = Object.entries(snapshot.data).map(
+      ([username, validatorData]) => ({ username, rank: validatorData.rank }),
+    );
+
+    return { date: snapshot.human, data };
+  });
+
+  res.send(filtered);
 });
