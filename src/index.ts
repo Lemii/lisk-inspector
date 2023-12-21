@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { getLsNode, getMissingUsers, logSplashScreen, snapshotIsNeeded } from './utils';
-import { fetchMissingValidators, fetchValidators } from './services';
+import { fetchMissingValidators, fetchNetworkStatistics, fetchValidators } from './services';
 import { logger } from './lib';
 import { apiPort, updateInterval } from './config';
 import { format } from 'date-fns';
@@ -21,7 +21,7 @@ const start = () => {
   setInterval(async () => {
     const date = new Date();
 
-    const success = await generateValidatorData(date);
+    const success = await generateInspectorData(date);
 
     if (!success) {
       logger.info('Previous process failed. Skipping snapshot.. 👋\n');
@@ -32,7 +32,7 @@ const start = () => {
   }, updateInterval);
 };
 
-const generateValidatorData = async (date: Date) => {
+const generateInspectorData = async (date: Date) => {
   logger.info('Starting validator data process..');
   const timestamp = date.getTime();
 
@@ -64,12 +64,16 @@ const generateValidatorData = async (date: Date) => {
   const validatorsToCheck = getMissingUsers(validators);
 
   if (validatorsToCheck.length) {
-    const missingValidators = await fetchMissingValidators(node, validatorsToCheck);
+    const missingValidators = await fetchMissingValidators(node, validatorsToCheck.slice(-10));
     missingValidators.forEach(validator => validators.push(validator));
   }
 
   logger.info(`Processing data of ${validators.length} validators..`);
   processValidators(validators, timestamp);
+
+  logger.info(`Updating TVL..`);
+  const networkStatistics = await fetchNetworkStatistics(node);
+  tvl = networkStatistics.data.totalLocked.find(item => item.tokenID === '0000000000000000')?.amount ?? '0';
 
   logger.info('Done! ✅\n');
 
@@ -92,3 +96,6 @@ const generateSnapshot = async (date: Date) => {
 };
 
 start();
+
+// Quick & dirty, because why not at this point 😪
+export let tvl = '0';

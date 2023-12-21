@@ -78,3 +78,32 @@ export interface IndexStatusAPIResponse {
     lastUpdate: number;
   };
 }
+
+export interface NetworkStatisticsAPIResponse {
+  data: {
+    basic: {
+      totalPeers: number;
+      connectedPeers: number;
+      disconnectedPeers: number;
+    };
+    height: {
+      [key: string]: number;
+    };
+    networkVersion: {
+      [key: string]: number;
+    };
+    totalLocked: {
+      tokenID: string;
+      amount: string;
+    }[];
+    totalStaked: {
+      tokenID: string;
+      amount: string;
+    };
+    totalSelfStaked: {
+      tokenID: string;
+      amount: string;
+    };
+  };
+  meta: {};
+}

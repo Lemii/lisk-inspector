@@ -23,6 +23,7 @@ export const setupDb = () => {
     id INTEGER PRIMARY KEY,
     timestamp INTEGER NOT NULL UNIQUE,
     human TEXT NOT NULL UNIQUE,
+    tvl TEXT DEFAULT "0" NOT NULL,
     data TEXT NOT NULL
 );`;
 
@@ -82,9 +83,9 @@ export const updateValidator = (data: ValidatorData, name: string) => {
   db.prepare(query).run(JSON.stringify(data), name);
 };
 
-export const insertSnapshot = (timestamp: number, date: string, snapshot: SnapshotData) => {
-  const query = 'INSERT INTO snapshots (timestamp, human, data) VALUES (?, ?, ?)';
-  db.prepare(query).run(timestamp, date, JSON.stringify(snapshot));
+export const insertSnapshot = (timestamp: number, date: string, tvl: string, snapshot: SnapshotData) => {
+  const query = 'INSERT INTO snapshots (timestamp, human, tvl, data) VALUES (?, ?, ?, ?)';
+  db.prepare(query).run(timestamp, date, tvl, JSON.stringify(snapshot));
 };
 
 export const getLatestSnapshotDate = () => {

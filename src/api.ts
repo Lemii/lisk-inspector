@@ -4,6 +4,7 @@ import { logger } from './lib';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import { corsOptions } from './config';
+import { tvl } from '.';
 
 export const app = express();
 
@@ -101,4 +102,8 @@ app.get('/historical/rank/:amount', (req, res) => {
   });
 
   res.send(filtered);
+});
+
+app.get('/tvl', (req, res) => {
+  res.send(tvl);
 });

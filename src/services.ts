@@ -1,5 +1,5 @@
 import { getApi, logger } from './lib';
-import { ValidatorApiResponse, ValidatorApiData, IndexStatusAPIResponse } from './types';
+import { ValidatorApiResponse, ValidatorApiData, IndexStatusAPIResponse, NetworkStatisticsAPIResponse } from './types';
 import { handleError } from './utils';
 
 export const nodeIsHealthy = async (node: string) => {
@@ -77,4 +77,15 @@ export const fetchMissingValidators = async (node: string, validatorNames: strin
     .then(res => res.data);
 
   return validatorData.data;
+};
+
+export const fetchNetworkStatistics = async (node: string) => {
+  const url = `${node}/network/statistics`;
+  logger.debug(`Fetching network statistics from ${url}`);
+
+  const networkStatistics = await getApi()
+    .get<NetworkStatisticsAPIResponse>(url)
+    .then(res => res.data);
+
+  return networkStatistics;
 };
