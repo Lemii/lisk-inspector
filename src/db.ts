@@ -96,8 +96,10 @@ export const getLatestSnapshotDate = () => {
 };
 
 export const getLatestSnapshot = () => {
-  const query = 'SELECT timestamp,human,data FROM snapshots ORDER BY id DESC LIMIT 1;';
-  const snapshot = db.prepare(query).get() as { timestamp: number; human: string; data: string } | undefined;
+  const query = 'SELECT timestamp,human,tvl,data FROM snapshots ORDER BY id DESC LIMIT 1;';
+  const snapshot = db.prepare(query).get() as
+    | { timestamp: number; human: string; tvl: string; data: string }
+    | undefined;
 
   if (!snapshot) {
     return undefined;
@@ -112,14 +114,16 @@ export const getLatestSnapshot = () => {
 };
 
 export const getOldestSnapshot = () => {
-  const query = 'SELECT timestamp,human,data FROM snapshots LIMIT 1;';
-  const snapshot = db.prepare(query).get() as { timestamp: number; human: string; data: string } | undefined;
+  const query = 'SELECT timestamp,human,tvl,data FROM snapshots LIMIT 1;';
+  const snapshot = db.prepare(query).get() as
+    | { timestamp: number; human: string; tvl: string; data: string }
+    | undefined;
 
   if (!snapshot) {
     return undefined;
   }
 
-  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
+  const parsed: { timestamp: number; human: string; tvl: string; data: SnapshotData } = {
     ...snapshot,
     data: JSON.parse(snapshot.data),
   };
@@ -128,14 +132,16 @@ export const getOldestSnapshot = () => {
 };
 
 export const getSnapshotByDate = (date: string) => {
-  const query = 'SELECT timestamp,human,data FROM snapshots WHERE human = ?';
-  const snapshot = db.prepare(query).get(date) as { timestamp: number; human: string; data: string } | undefined;
+  const query = 'SELECT timestamp,human,tvl,data FROM snapshots WHERE human = ?';
+  const snapshot = db.prepare(query).get(date) as
+    | { timestamp: number; human: string; tvl: string; data: string }
+    | undefined;
 
   if (!snapshot) {
     return undefined;
   }
 
-  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
+  const parsed: { timestamp: number; human: string; tvl: string; data: SnapshotData } = {
     ...snapshot,
     data: JSON.parse(snapshot.data),
   };
@@ -144,13 +150,15 @@ export const getSnapshotByDate = (date: string) => {
 };
 
 export const getSnapshots = (amount = 14) => {
-  const query = 'SELECT timestamp,human,data FROM snapshots ORDER BY id DESC LIMIT ?;';
-  const snapshots = db.prepare(query).all(amount) as { timestamp: number; human: string; data: string }[];
+  const query = 'SELECT timestamp,human,tvl,data FROM snapshots ORDER BY id DESC LIMIT ?;';
+  const snapshots = db.prepare(query).all(amount) as { timestamp: number; human: string; tvl: string; data: string }[];
 
-  const parsedSnapshots: { timestamp: number; human: string; data: SnapshotData }[] = snapshots.map(snapshot => ({
-    ...snapshot,
-    data: JSON.parse(snapshot.data),
-  }));
+  const parsedSnapshots: { timestamp: number; human: string; tvl: string; data: SnapshotData }[] = snapshots.map(
+    snapshot => ({
+      ...snapshot,
+      data: JSON.parse(snapshot.data),
+    }),
+  );
 
   return parsedSnapshots;
 };
