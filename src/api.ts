@@ -4,7 +4,8 @@ import { logger } from './lib';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import { corsOptions } from './config';
-import { tvl } from '.';
+import { totalLocked, totalStaked, totalSelfStaked } from '.';
+import { Statistics } from './types';
 
 export const app = express();
 
@@ -104,6 +105,12 @@ app.get('/historical/rank/:amount', (req, res) => {
   res.send(filtered);
 });
 
-app.get('/tvl', (req, res) => {
-  res.send(tvl);
+app.get('/statistics', (_req, res) => {
+  const data: Statistics = {
+    totalLocked,
+    totalStaked,
+    totalSelfStaked,
+  };
+
+  res.send(data);
 });

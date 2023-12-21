@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { databasePath } from './config';
 import { logger } from './lib';
-import { SnapshotData, ValidatorData } from './types';
+import { SnapshotData, SnapshotParsed, SnapshotRaw, ValidatorData } from './types';
 
 const db = new Database(databasePath, { verbose: logger.silly });
 
@@ -23,7 +23,9 @@ export const setupDb = () => {
     id INTEGER PRIMARY KEY,
     timestamp INTEGER NOT NULL UNIQUE,
     human TEXT NOT NULL UNIQUE,
-    tvl TEXT DEFAULT "0" NOT NULL,
+    totalLocked TEXT NOT NULL DEFAULT "0",
+    totalStaked TEXT NOT NULL DEFAULT "0",
+    totalSelfStaked TEXT NOT NULL DEFAULT "0",
     data TEXT NOT NULL
 );`;
 
@@ -83,9 +85,17 @@ export const updateValidator = (data: ValidatorData, name: string) => {
   db.prepare(query).run(JSON.stringify(data), name);
 };
 
-export const insertSnapshot = (timestamp: number, date: string, tvl: string, snapshot: SnapshotData) => {
-  const query = 'INSERT INTO snapshots (timestamp, human, tvl, data) VALUES (?, ?, ?, ?)';
-  db.prepare(query).run(timestamp, date, tvl, JSON.stringify(snapshot));
+export const insertSnapshot = (
+  timestamp: number,
+  date: string,
+  totalLocked: string,
+  totalStaked: string,
+  totalSelfStaked: string,
+  snapshot: SnapshotData,
+) => {
+  const query =
+    'INSERT INTO snapshots (timestamp, human, totalLocked, totalStaked, totalSelfStaked, data) VALUES (?, ?, ?, ?, ?, ?)';
+  db.prepare(query).run(timestamp, date, totalLocked, totalStaked, totalSelfStaked, JSON.stringify(snapshot));
 };
 
 export const getLatestSnapshotDate = () => {
@@ -96,69 +106,55 @@ export const getLatestSnapshotDate = () => {
 };
 
 export const getLatestSnapshot = () => {
-  const query = 'SELECT timestamp,human,tvl,data FROM snapshots ORDER BY id DESC LIMIT 1;';
-  const snapshot = db.prepare(query).get() as
-    | { timestamp: number; human: string; tvl: string; data: string }
-    | undefined;
+  const query =
+    'SELECT timestamp, human, totalLocked, totalStaked, totalSelfStaked, data FROM snapshots ORDER BY id DESC LIMIT 1';
+  const snapshot = db.prepare(query).get() as SnapshotRaw | undefined;
 
   if (!snapshot) {
     return undefined;
   }
 
-  const parsed: { timestamp: number; human: string; data: SnapshotData } = {
-    ...snapshot,
-    data: JSON.parse(snapshot.data),
-  };
+  const parsed: SnapshotParsed = { ...snapshot, data: JSON.parse(snapshot.data) };
 
   return parsed;
 };
 
 export const getOldestSnapshot = () => {
-  const query = 'SELECT timestamp,human,tvl,data FROM snapshots LIMIT 1;';
-  const snapshot = db.prepare(query).get() as
-    | { timestamp: number; human: string; tvl: string; data: string }
-    | undefined;
+  const query = 'SELECT timestamp, human, totalLocked, totalStaked, totalSelfStaked,data FROM snapshots LIMIT 1';
+  const snapshot = db.prepare(query).get() as SnapshotRaw | undefined;
 
   if (!snapshot) {
     return undefined;
   }
 
-  const parsed: { timestamp: number; human: string; tvl: string; data: SnapshotData } = {
-    ...snapshot,
-    data: JSON.parse(snapshot.data),
-  };
+  const parsed: SnapshotParsed = { ...snapshot, data: JSON.parse(snapshot.data) };
 
   return parsed;
 };
 
 export const getSnapshotByDate = (date: string) => {
-  const query = 'SELECT timestamp,human,tvl,data FROM snapshots WHERE human = ?';
-  const snapshot = db.prepare(query).get(date) as
-    | { timestamp: number; human: string; tvl: string; data: string }
-    | undefined;
+  const query =
+    'SELECT timestamp, human, totalLocked, totalStaked, totalSelfStaked, data FROM snapshots WHERE human = ?';
+  const snapshot = db.prepare(query).get(date) as SnapshotRaw | undefined;
 
   if (!snapshot) {
     return undefined;
   }
 
-  const parsed: { timestamp: number; human: string; tvl: string; data: SnapshotData } = {
-    ...snapshot,
-    data: JSON.parse(snapshot.data),
-  };
+  const parsed: SnapshotParsed = { ...snapshot, data: JSON.parse(snapshot.data) };
 
   return parsed;
 };
 
 export const getSnapshots = (amount = 14) => {
-  const query = 'SELECT timestamp,human,tvl,data FROM snapshots ORDER BY id DESC LIMIT ?;';
-  const snapshots = db.prepare(query).all(amount) as { timestamp: number; human: string; tvl: string; data: string }[];
+  const query =
+    'SELECT timestamp, human, totalLocked, totalStaked, totalSelfStaked, data FROM snapshots ORDER BY id DESC LIMIT ?';
+  const snapshots = db.prepare(query).all(amount) as SnapshotRaw[];
 
-  const parsedSnapshots: { timestamp: number; human: string; tvl: string; data: SnapshotData }[] = snapshots.map(
-    snapshot => ({
-      ...snapshot,
-      data: JSON.parse(snapshot.data),
-    }),
-  );
+  const parsedSnapshots: SnapshotParsed[] = snapshots.map(snapshot => ({
+    ...snapshot,
+    data: JSON.parse(snapshot.data),
+  }));
 
   return parsedSnapshots;
 };

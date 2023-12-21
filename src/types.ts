@@ -23,6 +23,25 @@ export type ChangeEvent = {
 
 export type SnapshotData = { [key: string]: ValidatorData };
 
+export type SnapShot<T> = {
+  timestamp: number;
+  human: string;
+  totalLocked: string;
+  totalStaked: string;
+  totalSelfStaked: string;
+  data: T;
+};
+
+export type SnapshotRaw = SnapShot<string>;
+
+export type SnapshotParsed = SnapShot<SnapshotData>;
+
+export type Statistics = {
+  totalLocked: string;
+  totalStaked: string;
+  totalSelfStaked: string;
+};
+
 /**
  * Lisk Service API responses
  */

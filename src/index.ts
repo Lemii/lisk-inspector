@@ -73,7 +73,10 @@ const generateInspectorData = async (date: Date) => {
 
   logger.info(`Updating TVL..`);
   const networkStatistics = await fetchNetworkStatistics(node);
-  tvl = networkStatistics.data.totalLocked.find(item => item.tokenID === '0000000000000000')?.amount ?? '0';
+
+  totalLocked = networkStatistics.data.totalLocked.find(item => item.tokenID === '0000000000000000')?.amount ?? '0';
+  totalStaked = networkStatistics.data.totalStaked.amount ?? '0';
+  totalSelfStaked = networkStatistics.data.totalSelfStaked.amount ?? '0';
 
   logger.info('Done! ✅\n');
 
@@ -98,4 +101,6 @@ const generateSnapshot = async (date: Date) => {
 start();
 
 // Quick & dirty, because why not at this point 😪
-export let tvl = '0';
+export let totalLocked = '0';
+export let totalStaked = '0';
+export let totalSelfStaked = '0';

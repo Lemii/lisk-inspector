@@ -1,4 +1,4 @@
-import { tvl } from '.';
+import { totalLocked, totalSelfStaked, totalStaked } from '.';
 import { eventsToTrack } from './config';
 import * as db from './db';
 import { SnapshotData, ValidatorApiData, ValidatorData } from './types';
@@ -62,5 +62,5 @@ export const processSnapshot = (date: string, timestamp: number) => {
     delete snapshot[username]?.changeEvents;
   });
 
-  db.insertSnapshot(timestamp, date, tvl, snapshot);
+  db.insertSnapshot(timestamp, date, totalLocked, totalStaked, totalSelfStaked, snapshot);
 };
