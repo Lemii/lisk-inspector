@@ -28,6 +28,9 @@ app.get('/', (req, res) => {
 
 app.get('/validators', (_req, res) => {
   const validators = getAllValidators();
+  validators.forEach(validator => {
+    delete validator.data.changeEvents;
+  });
   res.send(validators);
 });
 

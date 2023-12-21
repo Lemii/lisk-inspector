@@ -18,6 +18,12 @@ export const logLevel = process.env.NODE_ENV === 'development' ? 'silly' : 'debu
 export const apiPort = process.env.API_PORT ? Number(process.env.API_PORT) : 4000;
 
 export const corsOptions = {
-  origin: ['https://lemii.dev', 'https://www.lemii.dev', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: [
+    'https://lemii.dev',
+    'https://www.lemii.dev',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://inspector.lemii.dev',
+  ],
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
