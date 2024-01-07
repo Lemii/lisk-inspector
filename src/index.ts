@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { getLsNode, getMissingUsers, logSplashScreen, snapshotIsNeeded } from './utils';
+import { getLsNode, getMissingUsers, logSplashScreen, shuffleArray, snapshotIsNeeded } from './utils';
 import { fetchMissingValidators, fetchNetworkStatistics, fetchValidators } from './services';
 import { logger } from './lib';
 import { apiPort, updateInterval } from './config';
@@ -61,9 +61,10 @@ const generateInspectorData = async (date: Date) => {
    * The tool still needs to be able to track the changes in statistics,
    * so the data for these validator is explicitly requested.
    */
-  const validatorsToCheck = getMissingUsers(validators);
+  const missingUsers = getMissingUsers(validators);
 
-  if (validatorsToCheck.length) {
+  if (missingUsers.length) {
+    const validatorsToCheck = shuffleArray(missingUsers);
     const missingValidators = await fetchMissingValidators(node, validatorsToCheck.slice(-10));
     missingValidators.forEach(validator => validators.push(validator));
   }

@@ -11,6 +11,7 @@ export const app = express();
 
 /** API configuration */
 app.use(cors(corsOptions));
+app.set('trust proxy', 1);
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -114,3 +115,8 @@ app.get('/statistics', (_req, res) => {
 
   res.send(data);
 });
+
+/** Dev routes */
+app.get('/ip', (request, response) => response.send(request.ip));
+
+app.get('/x-forwarded-for', (request, response) => response.send(request.headers['x-forwarded-for']));
